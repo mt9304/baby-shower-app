@@ -11,6 +11,9 @@
 
 <div class="container">
     <h1 style="text-align: center; margin-top: 250px; font-size: 4em;">Vote or suggest a middle name for Remy!</h1>
+    <div class="alert alert-warning alert-dismissible fade in" role="alert" style="margin-top: 50px;">
+        <strong>Who did this?</strong>
+    </div>
     <div id="questionArea">
         <div style="display: flex; flex-direction: column; margin-top: 100px;" id="middleNamesList">
             <!--div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 10px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Oliver</div>
@@ -27,10 +30,10 @@
     <input id="alreadySuggestedNameInput" type="text" class="form-control" maxlength="1" placeholder="You have already suggested a name. " disabled>
     <!--button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%;">Submit</button-->
 </div>
-    <script src="firebase-functions.js"></script>
+    <script src="middle-name.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
         const firebaseConfig = {
             apiKey: "AIzaSyAoDqyAV3JHc5Je3LvlZ3JBNCXSysnqhAs",
             authDomain: "baby-shower-app-865b6.firebaseapp.com",
@@ -55,9 +58,21 @@
             return middleNamesList[0];
         }
         
-        //getMiddleNames(db);
+        async function updateMiddleName(db, name, guest) {
+            const middleNameRef = doc(db, "middleNames", "names");
+            
+            await updateDoc(middleNameRef, {
+                [name]: [guest]
+            });
+        }
+
+        updateMiddleName(db, "Oscar", "guest1");
+
         let middleNames = await getMiddleNames(db);
+        console.log(JSON.stringify(middleNames));
         PopulateListOfMiddleNames(middleNames);
+
+
     </script>
     
     <script>
