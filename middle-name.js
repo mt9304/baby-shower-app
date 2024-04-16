@@ -21,6 +21,12 @@ function PopulateListOfMiddleNames(middleNames) {
         element.style.paddingLeft = '25px';
         element.style.marginTop = '25px';
         element.textContent = name;
+        element.classList.add('voteMiddleName');
+        element.dataset.name = name;
+
+        if (localStorage.remyNameSuggested == name) {
+            element.style.backgroundColor = "#ADD8E6";
+        }
         //Add the record.length value in text form to the right of the bar graph
         const lengthText = document.createElement('div');
         lengthText.textContent = ` (${record.length})`;
