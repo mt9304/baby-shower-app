@@ -84,9 +84,12 @@
       </div>
 
     <h1 style="text-align: center; margin-top: 250px; font-size: 4em;">Vote or suggest a middle name for Remy!</h1>
-    <div class="alert alert-warning alert-dismissible fade in" role="alert" style="margin-top: 50px;">
-        <strong>Who did this?</strong>
+    <div class="alert alert-warning alert-dismissible fade in" role="alert" style="margin-top: 50px; display: none;">
+        <strong>Test Dynamic Note</strong>
     </div>
+
+    <p style="margin-top: 50px;">Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person)</p>
+
     <div id="questionArea">
         <div style="display: flex; flex-direction: column; margin-top: 100px;" id="middleNamesList">
             <!--div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 10px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Oliver</div>
@@ -95,16 +98,19 @@
         </div>
     </div>
     <div id="suggestNameSection">
-        <div class="input-group input-group-lg" style="margin-top: 10px; width: 100%;">
-            <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="Suggest a middle name (1 suggestion per person)" style="width: 100%;">
+        <div class="input-group input-group-lg" style="margin-top: 150px; width: 100%;">
+            <label id="suggestNameLabel" class="input-group-addon" for="suggestNameInput">Suggest a middle name!</label>
+            <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="1 suggestion per person" style="width: 100%;">
         </div>
         <div class="input-group" style="margin-top: 10px; width: 100%; text-align: center;">
             <button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%;">Submit</button>
         </div>
+        <div class="input-group input-group-lg" style="width: 100%; display: none;" id="alreadySuggestedNameInput">
+            <input type="text" class="form-control" maxlength="1" placeholder="You have already suggested a name. " disabled>
+        </div>
+        <br>
+        <div style="margin-top: 50px;"></div>
     </div>
-
-    <input id="alreadySuggestedNameInput" type="text" class="form-control" maxlength="1" placeholder="You have already suggested a name. " disabled>
-    <!--button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%;">Submit</button-->
 </div>
     <script src="middle-name.js"></script>
     <script type="module">
@@ -197,11 +203,20 @@
             updateGuestDisplayName(db, guestId, guestDisplayName)
         }
 
+        async function suggestName() {
+            let suggestedName = document.getElementById("suggestNameInput").value;
+            let guestId = localStorage.getItem("remyGuestId");
+            updateMiddleName(db, suggestedName, guestId)
+            localStorage.setItem("remySuggestedName", true);
+            window.location.reload();
+        }
+
 
         //Event Listers
         //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
         document.getElementById("setGuestName").addEventListener("click", setGuestName);
         document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
+        document.getElementById("suggestNameButton").addEventListener("click", suggestName);
 
         //updateMiddleName(db, "Oscar", "guest1");
         let middleNames = await getMiddleNames(db);
@@ -221,11 +236,14 @@
                 document.getElementById("openGuestNameModal").style.display = "block";
                 document.getElementById("guestGreeting").style.display = "none";
             }
-        });
 
-    </script>
-    
-    <script>
+            if (localStorage.getItem("remySuggestedName")) {
+                document.getElementById("suggestNameInput").style.display = "none";
+                document.getElementById("suggestNameLabel").style.display = "none";
+                document.getElementById("suggestNameButton").style.display = "none";
+                document.getElementById("alreadySuggestedNameInput").style.display = "block";
+            }
+        });
 
     </script>
 </body>
