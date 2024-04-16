@@ -3,6 +3,12 @@ function PopulateListOfMiddleNames(middleNames) {
     //console.log("Starting");
     //console.log(middleNamesTest);
     //console.log(middleNames);
+
+
+    // Sort the middleNames records by how many entries in their arrays they have
+    let sortedMiddleNames = Object.entries(middleNames).sort((a, b) => b[1].length - a[1].length);
+    middleNames = Object.fromEntries(sortedMiddleNames);
+
     for (const [name, record] of Object.entries(middleNames)) {
         const width = 10 + (50 * record.length);
         const element = document.createElement('div');

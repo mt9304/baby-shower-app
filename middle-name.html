@@ -8,6 +8,30 @@
     <title>Remy's Party App | Suggest A Middle Name</title>
 </head>
 <body>
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">Home</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="middle-name.html">Suggest A Middle Name</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li id="setGuestName"><a href="#" onclick="SetGuestName()">Please set your name to participate</a></li>
+                <li id="guestGreeting" style="display: none;"><a href="#" onclick="changeGuestName()">Hello </a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 
 <div class="container">
     <h1 style="text-align: center; margin-top: 250px; font-size: 4em;">Vote or suggest a middle name for Remy!</h1>
@@ -21,12 +45,15 @@
             <div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 110px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Tom</div-->
         </div>
     </div>
-    <div class="input-group input-group-lg" style="margin-top: 10px;">
-        <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="Suggest a middle name (1 suggestion per person)">
-        <span class="input-group-btn">
-            <button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="margin-left: 10px;">Submit</button>
-        </span>
+    <div id="suggestNameSection">
+        <div class="input-group input-group-lg" style="margin-top: 10px; width: 100%;">
+            <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="Suggest a middle name (1 suggestion per person)" style="width: 100%;">
+        </div>
+        <div class="input-group" style="margin-top: 10px; width: 100%; text-align: center;">
+            <button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%;">Submit</button>
+        </div>
     </div>
+
     <input id="alreadySuggestedNameInput" type="text" class="form-control" maxlength="1" placeholder="You have already suggested a name. " disabled>
     <!--button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%;">Submit</button-->
 </div>
@@ -58,11 +85,19 @@
             return middleNamesList[0];
         }
         
-        async function updateMiddleName(db, name, guest) {
+        async function updateMiddleName(db, name, guestId) {
             const middleNameRef = doc(db, "middleNames", "names");
             
             await updateDoc(middleNameRef, {
-                [name]: [guest]
+                [name]: [guestId]
+            });
+        }
+
+        async function updateGuests(db, guestId) {
+            const guestsRef = doc(db, "guests", guestId);
+            
+            await updateDoc(guestsRef, {
+                [guestId]: [guest]
             });
         }
 
