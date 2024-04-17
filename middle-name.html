@@ -18,12 +18,12 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.html">Home</a>
+            <a class="navbar-brand" href="/baby-shower/index.html">Home</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="middle-name.html">Suggest A Middle Name</a></li>
+                <li><a href="/baby-shower/middle-name.html">Suggest A Middle Name</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li id="openGuestNameModal" style="display: none;"><a href="#" data-toggle="modal" data-target="#addGuestModal"><strong>Click here to set your name</strong></a></li>
@@ -88,7 +88,7 @@
         <strong>Test Dynamic Note</strong>
     </div>
 
-    <p style="margin-top: 50px;" id="middleNameNote">Please click on the top right to set your name in order to participate. </p>
+    <p style="margin-top: 50px; font-size: 2em;" id="middleNameNote">Please click on the top right to set your name in order to participate. </p>
 
     <div id="questionArea">
         <div style="display: flex; flex-direction: column; margin-top: 100px;" id="middleNamesList">
@@ -99,7 +99,7 @@
     </div>
     <div id="suggestNameSection">
         <div class="input-group input-group-lg" style="margin-top: 150px; width: 100%;">
-            <label id="suggestNameLabel" class="" for="suggestNameInput" style="display: none;">Suggest a middle name!</label>
+            <label id="suggestNameLabel" class="" for="suggestNameInput" style="display: none; font-size: 2em;">Suggest a middle name!</label>
             <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="1 suggestion per person" style="width: 100%; display: none;">
         </div>
         <div class="input-group" style="margin-top: 10px; width: 100%; text-align: center;">
@@ -141,6 +141,15 @@
         
         async function addMiddleName(db, name, guestId) {
             const middleNameRef = doc(db, "middleNames", "names");
+
+            try {
+                let previousVote = localStorage.getItem("remyNameVoted");
+                if (previousVote) {
+                    await removeGuestIdFromMiddleName(db, previousVote, guestId);
+                }
+            } catch (e) {
+                
+            }
             
             await updateDoc(middleNameRef, {
                 [name]: [guestId]
