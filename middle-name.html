@@ -139,12 +139,103 @@
             return middleNamesList[0];
         }
         
-        async function updateMiddleName(db, name, guestId) {
+        async function addMiddleName(db, name, guestId) {
             const middleNameRef = doc(db, "middleNames", "names");
             
             await updateDoc(middleNameRef, {
                 [name]: [guestId]
             });
+        }
+        
+        async function suggestName() {
+            let suggestedName = document.getElementById("suggestNameInput").value;
+            let guestId = localStorage.getItem("remyGuestId");
+            await addMiddleName(db, suggestedName, guestId)
+            localStorage.setItem("remySuggestedName", true);
+            localStorage.setItem("remyNameSuggested", suggestedName);
+            localStorage.setItem("remyNameVoted", suggestedName);
+            window.location.reload();
+        }
+
+        async function appendGuestIdToMiddleName(db, name, guestId) {
+            let middleNames = await getMiddleNames(db);
+            let guestIds = middleNames[name];
+
+            if (guestIds.includes(guestId)) {
+                console.log("Already voted for this name. ");
+                return;
+            }
+
+            guestIds.push(guestId);
+
+            const middleNameRef = doc(db, "middleNames", "names");
+            await updateDoc(middleNameRef, {
+                [name]: guestIds
+            });
+            //localStorage.setItem("remyNameVoted", name);
+        }
+
+        async function removeGuestIdFromMiddleName(db, name, guestId) {
+            let middleNames = await getMiddleNames(db);
+            let guestIds = middleNames[name];
+
+            if (guestIds) {
+                try {
+                    if (guestIds.includes(guestId)) {
+                        let index = guestIds.indexOf(guestId);
+                        if (index > -1) {
+                            guestIds.splice(index, 1);
+                        }
+                    }
+                } catch {
+                    console.log("Could not remove id. ");
+                }
+
+                const middleNameRef = doc(db, "middleNames", "names");
+                await updateDoc(middleNameRef, {
+                    [name]: guestIds
+                });
+            }
+
+
+        }
+
+        async function voteForName(e) {
+            if (!localStorage.getItem("remyGuestId")) {
+                console.log("No name set");
+                return;
+            }
+
+            let nameClicked = e.target.dataset.name;
+            let votes = e.target.dataset.votes;         
+            let guestId = localStorage.getItem("remyGuestId");
+
+            if (localStorage.getItem("remyNameSuggested" == nameClicked) || localStorage.getItem("remyNameVoted" == nameClicked)) {
+                    return;
+            }
+
+            if (confirm("Are you sure you want to vote for " + nameClicked + "?")) {
+                let previouslyVotedName = localStorage.getItem("remyNameVoted");
+                await removeGuestIdFromMiddleName(db, previouslyVotedName, guestId);
+                await appendGuestIdToMiddleName(db, nameClicked, guestId);
+                localStorage.setItem("remyNameVoted", nameClicked);
+                window.location.reload();
+            }
+
+            /*
+            let middleNames = await getMiddleNames(db);
+            console.log(JSON.stringify(middleNames));
+
+            //for each record in middleNames, if it's array value contains guestId, remove it from the array
+            //update that record with removed name by calling 
+            
+            //for each record in middleNames, if the key value is equal to nameClicked, then 
+
+            let namesJson = {"Oscar":["guest1"],"Oliver":["Lena2","Max2","Max1"],"test3":["Test1-=-Mozilla50WindowsNT100Win64x64AppleWebKit53736KHTMLlikeGeckoChrome123000Safari53736"],"test12":["test123-=-Mozilla50WindowsNT100Win64x64AppleWebKit53736KHTMLlikeGeckoChrome123000Safari53736"],"test1":["Test1-=-Mozilla50WindowsNT100Win64x64AppleWebKit53736KHTMLlikeGeckoChrome123000Safari53736"],"Oddie":["Max","Lena"]};
+            if (middleNames[name]) {
+                
+            }
+            */
         }
 
         async function getGuests(db) {
@@ -203,26 +294,13 @@
             updateGuestDisplayName(db, guestId, guestDisplayName)
         }
 
-        async function suggestName() {
-            let suggestedName = document.getElementById("suggestNameInput").value;
-            let guestId = localStorage.getItem("remyGuestId");
-            await updateMiddleName(db, suggestedName, guestId)
-            localStorage.setItem("remySuggestedName", true);
-            localStorage.setItem("remyNameSuggested", suggestedName);
-            window.location.reload();
-        }
-
-
-        //Event Listers
-        //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
-        document.getElementById("setGuestName").addEventListener("click", setGuestName);
-        document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
-        document.getElementById("suggestNameButton").addEventListener("click", suggestName);
-
         //updateMiddleName(db, "Oscar", "guest1");
         let middleNames = await getMiddleNames(db);
         //console.log(JSON.stringify(middleNames));
         PopulateListOfMiddleNames(middleNames);
+
+
+        
 
         
         $(document).ready(function() {
@@ -233,14 +311,22 @@
                 document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
                 document.getElementById("guestGreeting").style.display = "block";
                 document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
-                document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person)";
+                document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
                 showSubmitButton();
             } else {
                 document.getElementById("openGuestNameModal").style.display = "block";
                 document.getElementById("guestGreeting").style.display = "none";
             }
 
-
+            //Event Listers
+            //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
+            document.getElementById("setGuestName").addEventListener("click", setGuestName);
+            document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
+            document.getElementById("suggestNameButton").addEventListener("click", suggestName);
+            let namesElements = document.getElementsByClassName("voteMiddleName");
+            for (let i = 0; i < namesElements.length; i++) {
+                namesElements[i].addEventListener("click", voteForName);
+            }
         });
 
         function showSubmitButton() {

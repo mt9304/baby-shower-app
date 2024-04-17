@@ -23,14 +23,18 @@ function PopulateListOfMiddleNames(middleNames) {
         element.textContent = name;
         element.classList.add('voteMiddleName');
         element.dataset.name = name;
+        element.dataset.votes = record.length;
 
-        if (localStorage.remyNameSuggested == name) {
+        if (localStorage.remyNameVoted == name) {
             element.style.backgroundColor = "#ADD8E6";
         }
         //Add the record.length value in text form to the right of the bar graph
         const lengthText = document.createElement('div');
         lengthText.textContent = ` (${record.length})`;
+        lengthText.dataset.name = name;
+        lengthText.dataset.votes = record.length;
         element.appendChild(lengthText);
         document.getElementById('middleNamesList').appendChild(element);
+        
     }
 }
