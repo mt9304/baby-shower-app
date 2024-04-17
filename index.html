@@ -8,7 +8,79 @@
     <title>Remy's Party App</title>
 </head>
 <body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/baby-shower/index.html">Home</a>
+            </div>
+    
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="/baby-shower/middle-name.html">Suggest A Middle Name</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="openGuestNameModal" style="display: none;"><a href="#" data-toggle="modal" data-target="#addGuestModal"><strong>Click here to set your name</strong></a></li>
+                    <li id="guestGreeting" style="display: none;"><a href="#" data-toggle="modal" data-target="#editGuestModal" id="guestGreetingText">Hello </a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
 <div class="container">
+    <!-- New Guest Modal -->
+  <div class="modal fade" id="addGuestModal" tabindex="-1" role="dialog" aria-labelledby="addGuestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGuestModalLabel">Please Enter Your Name To Participate</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <span class="input-group-addon" id="sizing-addon2">Your Name</span>
+            <input type="text" class="form-control" placeholder="" aria-describedby="sizing-addon2" id="guestNameInput" style="">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="setGuestName">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Modify Guest Modal -->
+    <div class="modal fade" id="editGuestModal" tabindex="-1" role="dialog" aria-labelledby="editGuestModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editGuestModalLabel">Edit Your Display Name</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="input-group">
+                <span class="input-group-addon" id="sizing-addon2">Your Name</span>
+                <input type="text" class="form-control" placeholder="" aria-describedby="sizing-addon2" id="editGuestNameInput" style="">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="editGuestNameButton">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <br>
     <h1 class="text-center">Welcome to Remy's Party!</h1>
     <br>
@@ -16,7 +88,7 @@
     <br>
     <div class="row margin-30">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
-            <a href="/baby-shower/middle-names.html" class="">
+            <a href="/baby-shower/middle-name.html" class="">
                 <img src="https://raw.githubusercontent.com/mt9304/baby-shower-app/main/img/middleName.png" alt="" class="img-rounded img-responsive center-block" style="width: 250px; height: 250px; border-radius: 20%;">
                 <p class="text-center" style="font-size: 2em;">Suggest A Middle Name</p>
             </a>
@@ -48,6 +120,97 @@
     </div>
 </div>
 
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, addDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoDqyAV3JHc5Je3LvlZ3JBNCXSysnqhAs",
+        authDomain: "baby-shower-app-865b6.firebaseapp.com",
+        databaseURL: "https://baby-shower-app-865b6-default-rtdb.firebaseio.com",
+        projectId: "baby-shower-app-865b6",
+        storageBucket: "baby-shower-app-865b6.appspot.com",
+        messagingSenderId: "345574283729",
+        appId: "1:345574283729:web:3f095573e6db205c9068f0",
+        measurementId: "G-5JFZBLLEQC"
+    };
 
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    var db = getFirestore(app);
+
+    async function getGuests(db) {
+        const guestsCollection = collection(db, 'guests');
+        const guestsSnapshot = await getDocs(guestsCollection);
+        const guestsList = guestsSnapshot.docs.map(doc => doc.data());
+        console.log(JSON.stringify(guestsList[0]));
+        return guestsList[0];
+    }
+
+    async function addGuest(db, guestId, guestDisplayName) {
+        let data = {
+            displayName: guestDisplayName,
+            testData2: "1=[][][][90-]2"
+        }
+
+        let results = await setDoc(doc(db, "guests", guestId), data);
+        localStorage.setItem("remyGuestId", guestId);
+        localStorage.setItem("remyGuestDisplayName", guestDisplayName);
+        location.reload();
+    }
+
+    async function updateGuestDisplayName(db, guestId, guestDisplayName) {
+        const guestsRef = doc(db, "guests", guestId);
+        
+        await updateDoc(guestsRef, {
+            displayName: guestDisplayName
+        });
+        localStorage.setItem("remyGuestDisplayName", guestDisplayName);
+        window.location.reload();
+    }
+
+    async function setGuestName() {
+        let guestDisplayName = document.getElementById("guestNameInput").value;
+        if (guestDisplayName === "") {
+            console.log("No name entered. ");
+            return;
+        }
+
+        //Get current user's user agent
+        let guestUserAgent = navigator.userAgent;
+        guestUserAgent = guestUserAgent.replace(/[^a-zA-Z0-9]/g, '');
+        let guestId = guestDisplayName + "-=-" + guestUserAgent;
+
+        addGuest(db, guestId, guestDisplayName)
+    }
+
+    async function editGuestName() {
+        let guestDisplayName = document.getElementById("editGuestNameInput").value;
+        if (guestDisplayName === "") {
+            console.log("No name entered. ");
+            return;
+        }
+
+        let guestId = localStorage.getItem("remyGuestId");
+        updateGuestDisplayName(db, guestId, guestDisplayName)
+    }
+
+    $(document).ready(function() {
+        if (localStorage.getItem("remyGuestId") && localStorage.getItem("remyGuestDisplayName")) {
+            document.getElementById("openGuestNameModal").style.display = "none";
+            document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
+            document.getElementById("guestGreeting").style.display = "block";
+            document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
+            showSubmitButton();
+        } else {
+            document.getElementById("openGuestNameModal").style.display = "block";
+            document.getElementById("guestGreeting").style.display = "none";
+        }
+
+        //Event Listers
+        //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
+        document.getElementById("setGuestName").addEventListener("click", setGuestName);
+        document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
+    });
+</script>
 </body>
 </html>
