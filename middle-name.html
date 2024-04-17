@@ -243,7 +243,6 @@
         async function addGuest(db, guestId, guestDisplayName) {
             let data = {
                 displayName: guestDisplayName,
-                testData2: "1=[][][][90-]2"
             }
 
             let results = await setDoc(doc(db, "guests", guestId), data);
