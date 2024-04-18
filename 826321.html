@@ -85,9 +85,9 @@
     <br>
     <h1 class="text-center" style="margin-top: 150px;">Admin Section</h1>
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
-        <button class="btn btn-primary" style="margin-bottom: 10px;">Clear All</button>
-        <button class="btn btn-primary" style="margin-bottom: 10px;">Clear All Except ID</button>
-        <button class="btn btn-primary">Clear ID</button>
+        <button class="btn btn-primary" style="margin-bottom: 10px;" id="clearAllButton">Clear All</button>
+        <button class="btn btn-primary" style="margin-bottom: 10px;" id="clearAllExceptIdButton">Clear All Except ID</button>
+        <button class="btn btn-primary" id="clearIdButton">Clear ID</button>
     </div>
     </div>
 </div>
@@ -165,8 +165,42 @@
         updateGuestDisplayName(db, guestId, guestDisplayName)
     }
 
-    $(document).ready(function() {
+    function clearAll() {
+        localStorage.clear();
+        location.reload();
+    }
 
+    function clearAllExceptId() {
+        localStorage.removeItem("remySuggestedName");
+        localStorage.removeItem("remyNameSuggested");
+        localStorage.removeItem("remyNameVoted");
+        location.reload();
+    }
+
+    function clearId() {
+        localStorage.removeItem("remyGuestId");
+        localStorage.removeItem("remyGuestDisplayName");
+        location.reload();
+    }
+
+    $(document).ready(function() {
+        if (localStorage.getItem("remyGuestId") && localStorage.getItem("remyGuestDisplayName")) {
+            //<li id="openGuestNameModal"><a href="#" data-toggle="modal" data-target="#addGuestModal" style="display: none;">Please set your name to participate</a></li>
+            //<li id="guestGreeting" style="display: none;"><a href="#" data-toggle="modal" data-target="#addGuestModal">Hello </a></li>
+            document.getElementById("openGuestNameModal").style.display = "none";
+            document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
+            document.getElementById("guestGreeting").style.display = "block";
+            document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
+            document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
+            showSubmitButton();
+        } else {
+            document.getElementById("openGuestNameModal").style.display = "block";
+            document.getElementById("guestGreeting").style.display = "none";
+        }
+
+        document.getElementById("clearAllButton").addEventListener("click", clearAll);
+        document.getElementById("clearAllExceptIdButton").addEventListener("click", clearAllExceptId);
+        document.getElementById("clearIdButton").addEventListener("click", clearId);
     });
 </script>
 </body>
