@@ -182,6 +182,7 @@
         localStorage.removeItem("remyNameVoted");
         localStorage.removeItem("remyBellyGuessed");
         localStorage.removeItem("remyBellyGuess");
+        localStorage.removeItem("remyMessaged");
         location.reload();
     }
 
@@ -199,13 +200,15 @@
             document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
             document.getElementById("guestGreeting").style.display = "block";
             document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
-            document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
-            showSubmitButton();
+            //document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
+            //showSubmitButton();
         } else {
             document.getElementById("openGuestNameModal").style.display = "block";
             document.getElementById("guestGreeting").style.display = "none";
         }
 
+        document.getElementById("setGuestName").addEventListener("click", setGuestName);
+        document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
         document.getElementById("clearAllButton").addEventListener("click", clearAll);
         document.getElementById("clearAllExceptIdButton").addEventListener("click", clearAllExceptId);
         document.getElementById("clearIdButton").addEventListener("click", clearId);

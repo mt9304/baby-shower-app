@@ -165,7 +165,7 @@
             if (bellyGuesses === undefined || bellyGuesses.length == 0) {
                 await addBellyGuess(db, guess, guestDisplayName);
             } else if (bellyGuesses.includes(guestDisplayName)) {
-                console.log("Already voted for this name. ");
+                console.log("Already guessed for this size. ");
             } else {
                 bellyGuesses.push(guestDisplayName);
                 const bellyGuessesRef = doc(db, "belly", "guesses");
@@ -276,10 +276,6 @@
             document.getElementById("setGuestName").addEventListener("click", setGuestName);
             document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
             document.getElementById("guessBellyButton").addEventListener("click", guessBelly);
-            let namesElements = document.getElementsByClassName("voteMiddleName");
-            for (let i = 0; i < namesElements.length; i++) {
-                namesElements[i].addEventListener("click", voteForName);
-            }
         });
 
         function showSubmitButton() {

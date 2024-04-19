@@ -94,7 +94,7 @@
         <strong id="dynamicNote">Test Dynamic Note</strong>
     </div>
 
-    <p style="margin-top: 50px; font-size: 2em;" id="bellyNote">Please click on the top right to enter your name in order to participate. </p>
+    <p style="margin-top: 50px; font-size: 2em;" id="messageNote">Please click on the top right to enter your name in order to participate. </p>
 
     <div id="questionArea">
         <div style="display: flex; flex-direction: column; margin-top: 50px;" id="">
@@ -103,13 +103,13 @@
             <div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 110px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Tom</div-->
         </div>
     </div>
-    <div id="guessBellySection">
+    <div id="remmyMessageSection">
         <div class="input-group input-group-lg" style="margin-top: 50px; width: 100%;">
-            <label id="guessBellyLabel" class="" for="guessBellyInput" style="display: none; font-size: 2em;">Message</label>
-            <textarea id="guessBellyInput" type="text" class="form-control" placeholder="Leave Remy's Message here" style="width: 100%; height: 400px; display: none;"></textarea>
+            <label id="remmyMessageLabel" class="" for="remmyMessageInput" style="display: none; font-size: 2em;">Message</label>
+            <textarea id="remmyMessageInput" type="text" class="form-control" placeholder="Leave Remy's Message here" style="width: 100%; height: 400px; display: none;"></textarea>
         </div>
         <div class="input-group" style="margin-top: 10px; width: 100%; text-align: center;">
-            <button id="guessBellyButton" class="btn btn-primary btn-block btn-lg" style="width: 100%; display: none">Send</button>
+            <button id="remmyMessageButton" class="btn btn-primary btn-block btn-lg" style="width: 100%; display: none">Send</button>
         </div>
         <div class="input-group input-group-lg" style="width: 100%; display: none;" id="alreadyGuessedInputDiv">
             <input id="alreadyGuessedInput" type="text" class="form-control" maxlength="1" placeholder="Thank you for leaving a message!" disabled>
@@ -118,7 +118,6 @@
         <div style="margin-top: 50px;"></div>
     </div>
 </div>
-    <script src="middle-name.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
         import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, addDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
@@ -137,68 +136,24 @@
         const app = initializeApp(firebaseConfig);
         var db = getFirestore(app);
 
-        async function getBellyGuesses(db, guess) {
-            const bellyGuessesCollection = collection(db, 'belly');
-            const bellyGuessesSnapshot = await getDocs(bellyGuessesCollection);
-            const bellyGuessesList = bellyGuessesSnapshot.docs.map(doc => doc.data());
-            console.log("getBellyGuesses");
-            console.log(JSON.stringify(bellyGuessesList[0][guess]));
-            
-            return bellyGuessesList[0][guess];
-        }
-
-        async function addBellyGuess(db, guess, guestDisplayName) {
-            const bellyGuessRef = doc(db, "belly", "guesses");
-
-            console.log(guess + " | " + guestDisplayName);
-
-            await updateDoc(bellyGuessRef, {
-                [guess]: [guestDisplayName]
-            });
-        }
-
-        async function appendBellyGuess(db, guess, guestDisplayName) {
-            let bellyGuesses = await getBellyGuesses(db, guess);
-            console.log("appendBellyGuess");
-            console.log(JSON.stringify(bellyGuesses));
-
-            if (bellyGuesses === undefined || bellyGuesses.length == 0) {
-                await addBellyGuess(db, guess, guestDisplayName);
-            } else if (bellyGuesses.includes(guestDisplayName)) {
-                console.log("Already voted for this name. ");
-            } else {
-                bellyGuesses.push(guestDisplayName);
-                const bellyGuessesRef = doc(db, "belly", "guesses");
-                //await updateDoc(bellyGuessesRef, bellyGuesses);
-                await updateDoc(bellyGuessesRef, {
-                    [guess]: bellyGuesses
-                });
-            }
-
-
-            localStorage.setItem("remyBellyGuessed", true);
-            //location.reload();
-        }
-
-        async function guessBelly() {
-            if (!localStorage.getItem("remyGuestId")) {
-                console.log("No name set");
-                return;
-            }
-
-            let guess = document.getElementById("guessBellyInput").value + "cm";
+        async function addMessage() {
+            let guestId = localStorage.getItem("remyGuestId");
             let guestDisplayName = localStorage.getItem("remyGuestDisplayName");
+            let message = document.getElementById("remmyMessageInput").value;
 
-            if (localStorage.getItem("remyBellyGuessed")) {
-                    return;
+            let data = {
+                guestId: guestId,
+                displayName: guestDisplayName,
+                message: message,
             }
 
-            if (confirm("Are you sure you want to guess " + guess + "?")) {
-                await appendBellyGuess(db, guess, guestDisplayName);
-                localStorage.setItem("remyBellyGuessed", true);
-                localStorage.setItem("remyBellyGuess", guess);
-                window.location.reload();
-            }
+            //delcare variable called timestampnow and set it to the current time
+            let timestampnow = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            let entryName = guestDisplayName + "-=--" + timestampnow;
+
+            let results = await setDoc(doc(db, "messages", entryName), data);
+            localStorage.setItem("remyMessaged", true);
+            location.reload();
         }
 
         async function getGuests(db) {
@@ -264,7 +219,7 @@
                 document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
                 document.getElementById("guestGreeting").style.display = "block";
                 document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
-                document.getElementById("bellyNote").textContent = "Leave Remy a message here if you would like to. I will create an email account for him and compile the messages there in his inbox. Once he is old enough to read, I can show him all the nice messages gathered here. ";
+                document.getElementById("messageNote").textContent = "Leave Remy a message here if you would like to. I will create an email account for him and compile the messages there in his inbox. Once he is old enough to read, I can show him all the nice messages gathered here. ";
                 showSubmitButton();
             } else {
                 document.getElementById("openGuestNameModal").style.display = "block";
@@ -275,24 +230,20 @@
             //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
             document.getElementById("setGuestName").addEventListener("click", setGuestName);
             document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
-            document.getElementById("guessBellyButton").addEventListener("click", guessBelly);
-            let namesElements = document.getElementsByClassName("voteMiddleName");
-            for (let i = 0; i < namesElements.length; i++) {
-                namesElements[i].addEventListener("click", voteForName);
-            }
+            document.getElementById("remmyMessageButton").addEventListener("click", addMessage);
         });
 
         function showSubmitButton() {
-            if (localStorage.getItem("remyBellyGuessed")) {
-                document.getElementById("guessBellyInput").style.display = "none";
-                document.getElementById("guessBellyLabel").style.display = "none";
-                document.getElementById("guessBellyButton").style.display = "none";
+            if (localStorage.getItem("remyMessaged")) {
+                document.getElementById("remmyMessageInput").style.display = "none";
+                document.getElementById("remmyMessageLabel").style.display = "none";
+                document.getElementById("remmyMessageButton").style.display = "none";
                 document.getElementById("alreadyGuessedInputDiv").style.display = "block";
-                document.getElementById("alreadyGuessedInput").placeholder = "You have already guessed " + localStorage.getItem("remyBellyGuess") + ". "
+                document.getElementById("alreadyGuessedInput").placeholder = "Thank you for leaving a message!"
             } else {
-                document.getElementById("guessBellyInput").style.display = "block";
-                document.getElementById("guessBellyLabel").style.display = "block";
-                document.getElementById("guessBellyButton").style.display = "block";
+                document.getElementById("remmyMessageInput").style.display = "block";
+                document.getElementById("remmyMessageLabel").style.display = "block";
+                document.getElementById("remmyMessageButton").style.display = "block";
             }
         }
 
