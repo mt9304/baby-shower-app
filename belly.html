@@ -151,13 +151,13 @@
             });
         }
 
-        async function appendGuestIdToMiddleName(db, guess, guestDisplayName) {
+        async function appendBellyGuess(db, guess, guestDisplayName) {
             let bellyGuesses = await getBellyGuesses(db, guess);
-            console.log("appendGuestIdToMiddleName");
+            console.log("appendBellyGuess");
             console.log(JSON.stringify(bellyGuesses));
 
             if (bellyGuesses === undefined || bellyGuesses.length == 0) {
-                addBellyGuess(db, guess, guestDisplayName);
+                await addBellyGuess(db, guess, guestDisplayName);
             } else if (bellyGuesses.includes(guestDisplayName)) {
                 console.log("Already voted for this name. ");
             } else {
@@ -171,7 +171,7 @@
 
 
             localStorage.setItem("remyBellyGuessed", true);
-            location.reload();
+            //location.reload();
         }
 
         async function guessBelly() {
@@ -188,7 +188,7 @@
             }
 
             if (confirm("Are you sure you want to guess " + guess + "?")) {
-                await appendGuestIdToMiddleName(db, guess, guestDisplayName);
+                await appendBellyGuess(db, guess, guestDisplayName);
                 localStorage.setItem("remyBellyGuessed", true);
                 localStorage.setItem("remyBellyGuess", guess);
                 window.location.reload();
