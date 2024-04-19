@@ -162,13 +162,14 @@
                 console.log("Already voted for this name. ");
             } else {
                 bellyGuesses.push(guestDisplayName);
+                const bellyGuessesRef = doc(db, "belly", "guesses");
+                //await updateDoc(bellyGuessesRef, bellyGuesses);
+                await updateDoc(bellyGuessesRef, {
+                    [guess]: bellyGuesses
+                });
             }
 
-            const bellyGuessesRef = doc(db, "belly", "guesses");
-            //await updateDoc(bellyGuessesRef, bellyGuesses);
-            await updateDoc(bellyGuessesRef, {
-                [guess]: bellyGuesses
-            });
+
             localStorage.setItem("remyBellyGuessed", true);
             location.reload();
         }
