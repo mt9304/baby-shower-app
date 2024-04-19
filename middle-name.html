@@ -159,6 +159,25 @@
         async function suggestName() {
             let suggestedName = document.getElementById("suggestNameInput").value;
             let guestId = localStorage.getItem("remyGuestId");
+            
+            if (suggestedName === "") {
+                console.log("No name entered.  ");
+                return;
+            }
+
+            //if suggestedName is already in the middleNames key regardless of case, then don't add it
+            let middleNames = await getMiddleNames(db);
+            //console.log(JSON.stringify(middleNames));
+            
+            let lowerCaseSuggestedName = suggestedName.toLowerCase();
+            let keys = Object.keys(middleNames).map(k => k.toLowerCase());
+            console.log(JSON.stringify(keys));
+            
+            if (keys.includes(lowerCaseSuggestedName)) {
+                console.log("Name already exists. ")
+                return;
+            }
+
             await addMiddleName(db, suggestedName, guestId)
             localStorage.setItem("remySuggestedName", true);
             localStorage.setItem("remyNameSuggested", suggestedName);
