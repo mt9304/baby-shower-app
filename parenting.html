@@ -2,10 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" href="style.css">
+    <script src="middle-name.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
-    <title>Remy's Party App | Guess Lena's Belly Size</title>
+    <title>Remy's Party App | Suggest A Middle Name</title>
 </head>
 <body>
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -91,30 +92,30 @@
         </div>
       </div>
 
-    <h1 style="text-align: center; margin-top: 250px; font-size: 4em;">Guess Lena's Belly size!</h1>
+    <h1 style="text-align: center; margin-top: 250px; font-size: 4em;">Vote or suggest a middle name for Remy!</h1>
     <div class="alert alert-warning alert-dismissible fade in" role="alert" style="margin-top: 50px; display: none;">
-        <strong id="dynamicNote">Test Dynamic Note</strong>
+        <strong>Test Dynamic Note</strong>
     </div>
 
-    <p style="margin-top: 50px; font-size: 2em;" id="bellyNote">Please click on the top right to enter your name in order to participate. </p>
+    <p style="margin-top: 50px; font-size: 2em;" id="middleNameNote">Please click on the top right to enter your name in order to participate. </p>
 
     <div id="questionArea">
-        <div style="display: flex; flex-direction: column; margin-top: 100px;" id="">
+        <div style="display: flex; flex-direction: column; margin-top: 100px;" id="middleNamesList">
             <!--div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 10px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Oliver</div>
             <div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 60px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Ollie</div>
             <div style="display: flex; align-items: center; border: 1px solid blue; height: 150px; width: 110px; font-size: 3em; padding-left: 25px; margin-top: 25px;">Tom</div-->
         </div>
     </div>
-    <div id="guessBellySection">
+    <div id="suggestNameSection">
         <div class="input-group input-group-lg" style="margin-top: 150px; width: 100%;">
-            <label id="guessBellyLabel" class="" for="guessBellyInput" style="display: none; font-size: 2em;">Belly Size In Centimeters</label>
-            <input id="guessBellyInput" type="number" step="1" class="form-control" placeholder="" onkeypress="return event.charCode >= 48 && event.charCode <= 57" style="width: 100%; display: none;">
+            <label id="suggestNameLabel" class="" for="suggestNameInput" style="display: none; font-size: 2em;">Suggest a middle name!</label>
+            <input id="suggestNameInput" type="text" class="form-control" maxlength="10" placeholder="1 suggestion per person" style="width: 100%; display: none;">
         </div>
         <div class="input-group" style="margin-top: 10px; width: 100%; text-align: center;">
-            <button id="guessBellyButton" class="btn btn-primary btn-block btn-lg" style="width: 100%; display: none">Submit</button>
+            <button id="suggestNameButton" class="btn btn-primary btn-block btn-lg" style="width: 100%; display: none">Submit</button>
         </div>
-        <div class="input-group input-group-lg" style="width: 100%; display: none;" id="alreadyGuessedInputDiv">
-            <input id="alreadyGuessedInput" type="text" class="form-control" maxlength="1" placeholder="You have already guessed. " disabled>
+        <div class="input-group input-group-lg" style="width: 100%; display: none;" id="alreadySuggestedNameInput">
+            <input type="text" class="form-control" maxlength="1" placeholder="You have already suggested a name. " disabled>
         </div>
         <br>
         <div style="margin-top: 50px;"></div>
@@ -138,66 +139,122 @@
         const app = initializeApp(firebaseConfig);
         var db = getFirestore(app);
 
-        async function getBellyGuesses(db, guess) {
-            const bellyGuessesCollection = collection(db, 'belly');
-            const bellyGuessesSnapshot = await getDocs(bellyGuessesCollection);
-            const bellyGuessesList = bellyGuessesSnapshot.docs.map(doc => doc.data());
-            console.log("getBellyGuesses");
-            console.log(JSON.stringify(bellyGuessesList[0][guess]));
-            
-            return bellyGuessesList[0][guess];
+        async function getMiddleNames(db) {
+            const middleNamesCollection = collection(db, 'middleNames');
+            const middleNamesSnapshot = await getDocs(middleNamesCollection);
+            const middleNamesList = middleNamesSnapshot.docs.map(doc => doc.data());
+            //console.log(JSON.stringify(middleNamesList[0]));
+            return middleNamesList[0];
         }
+        
+        async function addMiddleName(db, name, guestId) {
+            const middleNameRef = doc(db, "middleNames", "names");
 
-        async function addBellyGuess(db, guess, guestDisplayName) {
-            const bellyGuessRef = doc(db, "belly", "guesses");
-
-            console.log(guess + " | " + guestDisplayName);
-
-            await updateDoc(bellyGuessRef, {
-                [guess]: [guestDisplayName]
+            try {
+                let previousVote = localStorage.getItem("remyNameVoted");
+                if (previousVote) {
+                    await removeGuestIdFromMiddleName(db, previousVote, guestId);
+                }
+            } catch (e) {
+                
+            }
+            
+            await updateDoc(middleNameRef, {
+                [name]: [guestId]
             });
         }
+        
+        async function suggestName() {
+            let suggestedName = document.getElementById("suggestNameInput").value;
+            let guestId = localStorage.getItem("remyGuestId");
+            
+            if (suggestedName === "") {
+                console.log("No name entered.  ");
+                return;
+            }
 
-        async function appendBellyGuess(db, guess, guestDisplayName) {
-            let bellyGuesses = await getBellyGuesses(db, guess);
-            console.log("appendBellyGuess");
-            console.log(JSON.stringify(bellyGuesses));
+            //if suggestedName is already in the middleNames key regardless of case, then don't add it
+            let middleNames = await getMiddleNames(db);
+            //console.log(JSON.stringify(middleNames));
+            
+            let lowerCaseSuggestedName = suggestedName.toLowerCase();
+            let keys = Object.keys(middleNames).map(k => k.toLowerCase());
+            console.log(JSON.stringify(keys));
+            
+            if (keys.includes(lowerCaseSuggestedName)) {
+                console.log("Name already exists. ")
+                return;
+            }
 
-            if (bellyGuesses === undefined || bellyGuesses.length == 0) {
-                await addBellyGuess(db, guess, guestDisplayName);
-            } else if (bellyGuesses.includes(guestDisplayName)) {
-                console.log("Already guessed for this size. ");
-            } else {
-                bellyGuesses.push(guestDisplayName);
-                const bellyGuessesRef = doc(db, "belly", "guesses");
-                //await updateDoc(bellyGuessesRef, bellyGuesses);
-                await updateDoc(bellyGuessesRef, {
-                    [guess]: bellyGuesses
+            await addMiddleName(db, suggestedName, guestId)
+            localStorage.setItem("remySuggestedName", true);
+            localStorage.setItem("remyNameSuggested", suggestedName);
+            localStorage.setItem("remyNameVoted", suggestedName);
+            window.location.reload();
+        }
+
+        async function appendGuestIdToMiddleName(db, name, guestId) {
+            let middleNames = await getMiddleNames(db);
+            let guestIds = middleNames[name];
+
+            if (guestIds.includes(guestId)) {
+                console.log("Already voted for this name. ");
+                return;
+            }
+
+            guestIds.push(guestId);
+
+            const middleNameRef = doc(db, "middleNames", "names");
+            await updateDoc(middleNameRef, {
+                [name]: guestIds
+            });
+            //localStorage.setItem("remyNameVoted", name);
+        }
+
+        async function removeGuestIdFromMiddleName(db, name, guestId) {
+            let middleNames = await getMiddleNames(db);
+            let guestIds = middleNames[name];
+
+            if (guestIds) {
+                try {
+                    if (guestIds.includes(guestId)) {
+                        let index = guestIds.indexOf(guestId);
+                        if (index > -1) {
+                            guestIds.splice(index, 1);
+                        }
+                    }
+                } catch {
+                    console.log("Could not remove id. ");
+                }
+
+                const middleNameRef = doc(db, "middleNames", "names");
+                await updateDoc(middleNameRef, {
+                    [name]: guestIds
                 });
             }
 
 
-            localStorage.setItem("remyBellyGuessed", true);
-            //location.reload();
         }
 
-        async function guessBelly() {
+        async function voteForName(e) {
             if (!localStorage.getItem("remyGuestId")) {
                 console.log("No name set");
                 return;
             }
 
-            let guess = document.getElementById("guessBellyInput").value + "cm";
-            let guestDisplayName = localStorage.getItem("remyGuestDisplayName");
+            let nameClicked = e.target.dataset.name;
+            let votes = e.target.dataset.votes;         
+            let guestId = localStorage.getItem("remyGuestId");
 
-            if (localStorage.getItem("remyBellyGuessed")) {
+            if (localStorage.getItem("remyNameSuggested" == nameClicked) || localStorage.getItem("remyNameVoted" == nameClicked)) {
                     return;
             }
 
-            if (confirm("Are you sure you want to guess " + guess + "?")) {
-                await appendBellyGuess(db, guess, guestDisplayName);
-                localStorage.setItem("remyBellyGuessed", true);
-                localStorage.setItem("remyBellyGuess", guess);
+            if (confirm("Are you sure you want to vote for " + nameClicked + "?")) {
+                let previouslyVotedName = localStorage.getItem("remyNameVoted");
+                await removeGuestIdFromMiddleName(db, previouslyVotedName, guestId);
+                await appendGuestIdToMiddleName(db, nameClicked, guestId);
+                localStorage.setItem("remyNameVoted", nameClicked);
                 window.location.reload();
             }
         }
@@ -256,6 +313,15 @@
             let guestId = localStorage.getItem("remyGuestId");
             updateGuestDisplayName(db, guestId, guestDisplayName)
         }
+
+        //updateMiddleName(db, "Oscar", "guest1");
+        let middleNames = await getMiddleNames(db);
+        //console.log(JSON.stringify(middleNames));
+        PopulateListOfMiddleNames(middleNames);
+
+
+        
+
         
         $(document).ready(function() {
             if (localStorage.getItem("remyGuestId") && localStorage.getItem("remyGuestDisplayName")) {
@@ -265,7 +331,7 @@
                 document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
                 document.getElementById("guestGreeting").style.display = "block";
                 document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
-                document.getElementById("bellyNote").textContent = "Guess Lena's belly size (rounded to the nearest number) in centimeters! (You can only guess once) ";
+                document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
                 showSubmitButton();
             } else {
                 document.getElementById("openGuestNameModal").style.display = "block";
@@ -276,20 +342,23 @@
             //Add event listener for element with id "setGuestName" to run function setGuestName when clicked
             document.getElementById("setGuestName").addEventListener("click", setGuestName);
             document.getElementById("editGuestNameButton").addEventListener("click", editGuestName);
-            document.getElementById("guessBellyButton").addEventListener("click", guessBelly);
+            document.getElementById("suggestNameButton").addEventListener("click", suggestName);
+            let namesElements = document.getElementsByClassName("voteMiddleName");
+            for (let i = 0; i < namesElements.length; i++) {
+                namesElements[i].addEventListener("click", voteForName);
+            }
         });
 
         function showSubmitButton() {
-            if (localStorage.getItem("remyBellyGuessed")) {
-                document.getElementById("guessBellyInput").style.display = "none";
-                document.getElementById("guessBellyLabel").style.display = "none";
-                document.getElementById("guessBellyButton").style.display = "none";
-                document.getElementById("alreadyGuessedInputDiv").style.display = "block";
-                document.getElementById("alreadyGuessedInput").placeholder = "You have already guessed " + localStorage.getItem("remyBellyGuess") + ". "
+            if (localStorage.getItem("remySuggestedName")) {
+                document.getElementById("suggestNameInput").style.display = "none";
+                document.getElementById("suggestNameLabel").style.display = "none";
+                document.getElementById("suggestNameButton").style.display = "none";
+                document.getElementById("alreadySuggestedNameInput").style.display = "block";
             } else {
-                document.getElementById("guessBellyInput").style.display = "block";
-                document.getElementById("guessBellyLabel").style.display = "block";
-                document.getElementById("guessBellyButton").style.display = "block";
+                document.getElementById("suggestNameInput").style.display = "block";
+                document.getElementById("suggestNameLabel").style.display = "block";
+                document.getElementById("suggestNameButton").style.display = "block";
             }
         }
 
