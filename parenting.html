@@ -23,16 +23,16 @@
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/baby-shower-app/middle-name.html">Suggest A Middle Name</a></li>
+                <li><a href="/baby-shower-app/middle-name.html">Suggest Middle Name</a></li>
             </ul>
             <ul class="nav navbar-nav">
-                <li><a href="/baby-shower-app/belly.html">Guess Lena's Belly Size</a></li>
+                <li><a href="/baby-shower-app/belly.html">Guess Belly Size</a></li>
             </ul>
             <ul class="nav navbar-nav">
-                <li><a href="/baby-shower-app/parenting.html">Leave Remy A Message</a></li>
+                <li><a href="/baby-shower-app/parenting.html">Suggest Parenting Tips</a></li>
             </ul>
             <ul class="nav navbar-nav">
-                <li><a href="/baby-shower-app/message.html">Leave Remy A Message</a></li>
+                <li><a href="/baby-shower-app/message.html">Leave A Message</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li id="openGuestNameModal" style="display: none;"><a href="#" data-toggle="modal" data-target="#addGuestModal"><strong>Click here to enter your name</strong></a></li>
@@ -331,7 +331,7 @@
                 document.getElementById("guestGreetingText").textContent = "Hello " + localStorage.getItem("remyGuestDisplayName");
                 document.getElementById("guestGreeting").style.display = "block";
                 document.getElementById("editGuestNameInput").value = localStorage.getItem("remyGuestDisplayName");
-                document.getElementById("middleNameNote").textContent = "Tap on a name to cast your vote or suggest a new one at the bottom (1 vote or suggestion per person). You can switch your votes. ";
+                document.getElementById("middleNameNote").textContent = "Tap on an answer you agree with to share your opinion. ";
                 showSubmitButton();
             } else {
                 document.getElementById("openGuestNameModal").style.display = "block";
